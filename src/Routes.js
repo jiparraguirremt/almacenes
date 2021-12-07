@@ -34,7 +34,8 @@ import ChartsPage from '@/pages/Charts/Charts';
 import IconsPage from '@/pages/Icons/Icons';
 import NotificationsPage from '@/pages/Notifications/Notifications';
 import PersonalPage from '@/pages/Soporte/Personal/Personal';
-import GenerarOrdenPage from '@/pages/CompraMateriales/GenerarOrden';
+import GenerarOrdenPage from '@/pages/CompraMateriales/GenerarOrden/GenerarOrden';
+import AprobarOrdenPage from '@/pages/CompraMateriales/AprobarOrden/AprobarOrden';
 
 Vue.use(Router);
 
@@ -61,7 +62,11 @@ export default new Router({
           name: 'GenerarOrden',
           component: GenerarOrdenPage,
         },
-        
+        {
+          path: 'aprobarOrden',
+          name: 'AprobarOrden',
+          component: AprobarOrdenPage,
+        },
         
         
         {

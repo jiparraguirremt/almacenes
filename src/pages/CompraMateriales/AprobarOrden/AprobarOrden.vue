@@ -37,9 +37,9 @@
         >
         <b-row v-show="showTable">
           <b-col cols="10">
-            <h5 class="page-title">Lista de - <span class="fw-semi-bold">Expedientes</span></h5>
+            <h5 class="page-title">Lista de <span class="fw-semi-bold">Ordenes de compra</span></h5>
           </b-col>
-          <b-col cols="2" v-show="expedientes.length != 0">
+          <b-col cols="2" v-show="orden.length != 0">
             <b-row>
               <b-col class="text-right pr-3 mt-2">
                 <p>Cantidad:</p>
@@ -58,50 +58,79 @@
           </b-col>
         </b-row>
            
-        <h5 v-show="!showTable" class="page-title">Generar <span class="fw-semi-bold">orden de compra</span></h5>
+        <h5 v-show="!showTable" class="page-title">Aprobar <span class="fw-semi-bold">orden de compra</span></h5>
         <div class="data-loader">
-          <i class="la la-spinner la-spin" v-if="loadingTable"></i>
+          <i class="la la-spinner la-spin" v-if="orden.length == 0"></i>
         </div>
         <div v-show="showTable">
-          <p class="text-center" v-if="expedientes.length == 0">No hay registros</p>
+          <!-- <p class="text-center" v-if="expedientes.length == 0">No hay registros</p> -->
           <div class="table-resposive" >
-            <table class="table table-hover" v-if="expedientes.length != 0">
+            <table class="table table-hover" v-if="orden.length != 0">
               <thead>
                 <tr>
-                  <th class="hidden-sm-down">#</th>
-                  <th>Asunto</th>
-                  <th class="hidden-sm-down">N° de Registro</th>
+                  <th class="hidden-sm-down">Código de orden</th>
+                  <th>Descripción</th>
+                  <th class="hidden-sm-down">N° de Orden</th>
                   <th class="hidden-sm-down">Fecha</th>
-                  <th class="hidden-sm-down">Documento</th>
-                  <th class="hidden-sm-down">Estado</th>
-                  <th class="hidden-sm-down">Editar</th>
-                  <th class="hidden-sm-down">Eliminar</th>
+                  <th class="hidden-sm-down text-center">Documento</th>
+                  <!-- <th class="hidden-sm-down">Estado</th> -->
+                  <!-- <th class="hidden-sm-down">Editar</th> -->
+                  <th class="hidden-sm-down text-center">Aprobar</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in expedientes" :key="row.id_expediente">
-                  <td>{{row.id_expediente}}</td>
+                <tr v-for="row in orden" :key="row.id_orden">
+                  <td>{{row.id_orden}}</td>
                   <td class="width-150">
-                    {{row.c_asunto_exp}}
+                    {{row.descripcion}}
                   </td>
                   <td>
                     <p class="mb-0">
                       <small>
                         <span class="fw-semi-bold">Codigo:</span>
-                        <span class="text-muted">&nbsp; {{row.c_cod_exp}}</span>
+                        <span class="text-muted">&nbsp; {{row.id_orden}}</span>
                       </small>
                     </p>
                     <p>
                       <small>
-                        <span class="fw-semi-bold">Serie:</span>
-                        <span class="text-muted">&nbsp; {{row.id_tipo_doc_exp}}</span>
+                        <span class="fw-semi-bold">Fecha:</span>
+                        <span class="text-muted">&nbsp; {{row.fecha}}</span>
                       </small>
                     </p>
                   </td>
                   <td class="text-semi-muted">
-                    {{format_date(row.d_tramite_exp)}}
+                    {{format_date(row.fecha)}}
                   </td>
-                  <td class="text-semi-muted">
+                  <td class="text-center">
+                    <b-button variant="gray" size="sm" @click="generatePdf()">
+                      <b-icon icon="file-earmark-text" aria-hidden="true"></b-icon>
+                    </b-button>
+                  </td>
+                   <!-- <td class="text-semi-muted">
+                    <div style="width: 150px;white-space: normal;overflow: hidden;text-overflow: Ellipsis"
+                     v-for="file in row.arc_exp" :key="file.id_archivos_exp">
+                        <a target="_blank" >
+                        Previsualización</a>
+                      </div>
+                  </td> -->
+                  <td class="text-center">
+                    <b-button variant="gray" size="sm" @click="openModalEdit(row.id_expediente,row)">
+                      <b-icon icon="pencil-square" aria-hidden="true"></b-icon>
+                    </b-button>
+                    <b-modal :id="'modal-edit-'+row.id_expediente" title="Aprobar orden de compra" header-bg-variant="dark" body-bg-variant="light" 
+                     header-text-variant="white" :hide-footer="true">
+                      <p>¿Desea aprobar la orden de compra?</p>
+                      <div class="text-right">
+                        <b-button v-if="!loadingModal" variant="secondary" @click="hideModalEdit(row.id_expediente);">Cancelar</b-button>
+                        <b-button class="ml-1" v-if="!loadingModal" variant="info" @click="hideModalEdit(row.id_expediente);">Aprobar</b-button>
+                        <div class="data-loader">
+                          <i class="la la-spinner la-spin" v-if="loadingModal"></i>
+                        </div>
+                      </div>
+                      
+                    </b-modal>  
+                  </td>
+                  <!-- <td class="text-semi-muted">
                     <div style="width: 150px;white-space: normal;overflow: hidden;text-overflow: Ellipsis"
                      v-for="file in row.arc_exp" :key="file.id_archivos_exp">
                         <a target="_blank" :href="ip+'/public/'+file.c_archivo_exp">
@@ -166,11 +195,8 @@
                       </div>
                       
                     </b-modal>  
-                  </td>
-                  <td  style="text-muted">
-
-                    <!-- <b-form-checkbox :checked="row.id_expediente" @change="openModalDelete(row.id_expediente)" name="check-button" switch>
-                    </b-form-checkbox> -->
+                  </td> -->
+                  <!-- <td  style="text-muted">
 
                     <b-button variant="danger" size="sm" @click="openModalDelete(row.id_expediente)">
                       <b-icon icon="trash" aria-hidden="true"></b-icon>
@@ -186,7 +212,7 @@
                       </div>
                     </div>
                   </b-modal>
-                  </td>
+                  </td> -->
                 </tr>
               </tbody>
             </table>
@@ -194,10 +220,10 @@
           <div class="clearfix">
             <div class="float-right">
               <!--<b-button variant="default" class="mr-3" size="sm" >Send to...</b-button>-->
-              <b-button variant="inverse" class="mr-xs" size="sm" @click="register">Agregar</b-button>
+              <!-- <b-button variant="inverse" class="mr-xs" size="sm" @click="register">Agregar</b-button> -->
             </div>
           </div>
-          <div v-show="expedientes.length != 0" class="mt-3">
+          <div v-show="orden.length != 0" class="mt-3">
             <!-- <h6 class="text-right">Pagi</h6> -->
             <b-pagination v-show="showTable" v-model="page" :total-rows="allRows" 
             :per-page="perpage" align="right" @input =" loadPage(page)" first-number
@@ -412,9 +438,9 @@
 </template>
 <script>
 import Vue from 'vue'
-import config from '../../config'
+import config from '../../../config'
 import Widget from '@/components/Widget/Widget'
-import Sparklines from '../../components/Sparklines/Sparklines'
+import Sparklines from '../../../components/Sparklines/Sparklines'
 
 import DatePicker from 'vue2-datepicker'
 import 'vue2-datepicker/index.css'
@@ -424,12 +450,14 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import VueHtml2pdf from 'vue-html2pdf'
 import html2pdf from 'html2pdf.js'
 import moment from 'moment'
+import jsPDF from 'jspdf'
+
 moment.locale('es')
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
 export default {
-  name: 'GenerarOrden',
+  name: 'AprobarOrden',
   components: {
     Widget,
     Sparklines,
@@ -448,12 +476,13 @@ export default {
       selectedFile: null,
       loadingDni: false,
       loadingTable: true,
-      showTable: false,
-      showRegister: true,
+      showTable: true,
+      showRegister: false,
       showSearch: false,
       loadingForm: false,
       loadingModal: false,
       expedientes: [],
+      orden: [],
       typeDoc:[{text:'La Paz Murillo',value:1},{text:'Almacen 2',value:2}],
       proveedorList:[{text:'La Paz Murillo',value:1},{text:'Almacen 2',value:2}],
       facturarList:[{text:'DigitalWork SA',value:1}],
@@ -1165,31 +1194,47 @@ export default {
         console.log(error);
       });
     },
+    getOrden(){
+        axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/orden de compra.json')
+      .then( (response) =>{
+        console.log(response.data)
+        this.orden = response.data;
+      })
+        console.log('get orden');
+    },
+    generatePdf(){
+      var pdf = new jsPDF();
+
+      pdf.text('ORDEN DE COMPRA',10,10);
+      
+      pdf.save('boleta.pdf');
+    }
   },
   computed: {
   
   },
   created() {
+    this.getOrden();
     // this.loadTypeDoc();
-    this.user = JSON.parse(window.localStorage.getItem('user'));
-    this.id_user = this.user.id_usuario;
-    if (window.localStorage.getItem('authenticated') === 'true') {
-     axios.get(config.hostname+'expediente/obtener_expediente_area/1/'+this.page+'/'+this.perpage+'/'+this.id_user)
-      .then( (response) =>{
-        this.expedientes = response.data.data;
-        this.allRows = Number(response.data.total);
-        this.loadingTable = false;
-        this.showTable = false;
-      })
-      .catch( (error) =>{
-        console.log(error);
-      });
-    }
-    else{
-      this.$router.push('/login');
-    }
+    // this.user = JSON.parse(window.localStorage.getItem('user'));
+    // this.id_user = this.user.id_usuario;
+    // if (window.localStorage.getItem('authenticated') === 'true') {
+    //  axios.get(config.hostname+'expediente/obtener_expediente_area/1/'+this.page+'/'+this.perpage+'/'+this.id_user)
+    //   .then( (response) =>{
+    //     this.expedientes = response.data.data;
+    //     this.allRows = Number(response.data.total);
+    //     this.loadingTable = false;
+    //     this.showTable = false;
+    //   })
+    //   .catch( (error) =>{
+    //     console.log(error);
+    //   });
+    // }
+    // else{
+    //   this.$router.push('/login');
+    // }
   }
 };
 </script>
 
-<style src="./GenerarOrden.scss" lang="scss" scoped />
+<style src="./AprobarOrden.scss" lang="scss" scoped />

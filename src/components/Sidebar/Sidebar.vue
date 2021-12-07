@@ -28,7 +28,8 @@
             iconName="flaticon-settings"
             index="soporte"
             :childrenLinks="[
-              { header: 'Orden de compra', link: '/app/partes' },
+              { header: 'Orden de compra', link: '/app/generarOrden' },
+              { header: 'Aprobar orden de compra', link: '/app/aprobarOrden' },
               { header: 'Solicitar presupuesto' },
               { header: 'Confirma compra' },
             ]"
