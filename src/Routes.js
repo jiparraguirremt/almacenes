@@ -36,6 +36,7 @@ import NotificationsPage from '@/pages/Notifications/Notifications';
 import PersonalPage from '@/pages/Soporte/Personal/Personal';
 import GenerarOrdenPage from '@/pages/CompraMateriales/GenerarOrden/GenerarOrden';
 import AprobarOrdenPage from '@/pages/CompraMateriales/AprobarOrden/AprobarOrden';
+import FormularioSolicitudMaterial from '@/pages/SolicitudMaterial/FormularioSolicitudMaterial/FormularioSolicitudMaterial';
 
 Vue.use(Router);
 
@@ -66,6 +67,11 @@ export default new Router({
           path: 'aprobarOrden',
           name: 'AprobarOrden',
           component: AprobarOrdenPage,
+        },
+        {
+          path: 'formularioSolicitudMaterial',
+          name: 'FormularioSolicitudMaterial',
+          component : FormularioSolicitudMaterial,
         },
         
         

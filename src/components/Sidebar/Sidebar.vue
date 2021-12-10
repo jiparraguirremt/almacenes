@@ -32,6 +32,7 @@
               { header: 'Aprobar orden de compra', link: '/app/aprobarOrden' },
               { header: 'Solicitar presupuesto' },
               { header: 'Confirma compra' },
+              { header: 'Formularirio de Solicitud de Material', link:'/app/formularioSolicitudMaterial'},
             ]"
         />
         <!-- <NavLink
