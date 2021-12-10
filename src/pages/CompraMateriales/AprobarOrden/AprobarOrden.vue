@@ -1206,7 +1206,8 @@ export default {
       var pdf = new jsPDF();
 
       pdf.text('ORDEN DE COMPRA',10,10);
-      
+      pdf.text('CÓDIGO',150,10);
+      pdf.text('OC18043',150,20);
       pdf.save('boleta.pdf');
     }
   },
