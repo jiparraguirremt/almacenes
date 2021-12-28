@@ -10,7 +10,7 @@
       <h5 v-if="showRegister" class="auth-logo">
         <i class="fa fa-circle text-primary"></i>
         Recuperar contraseña
-        <i class="fa fa-circle text-danger"></i>
+        <i class="fa fa-circle text-primary"></i>
       </h5>
       <Widget v-if="!showRegister" class="widget-auth mx-auto" title="<h3 class='mt-0'>Inicie sesión en Vuela Almacenes</h3>" customHeader>
         <p class="widget-auth-info mt-2">
@@ -38,11 +38,13 @@
             </div>
           </div>
           <b-button type="submit" size="sm" class="auth-btn mb-1" variant="inverse" v-if="!loading">Iniciar sesión</b-button>
-          <!-- <a href="#" class="d-block text-right" @click="showRegister = true" v-if="!loading">Recuperar contraseña</a> ! -->
+
+            <a href="#" class="d-block text-right" @click="showRegister = true" v-if="!loading">Recuperar contraseña</a> 
         </form>
         <div class="data-loader">
           <i class="la la-spinner la-spin" v-if="loading"></i>
         </div>
+        
       </Widget>
 
       <Widget v-if="showRegister" class="widget-auth mx-auto" title="<h3 class='mt-0'>Recuperar contraseña</h3>" customHeader>
@@ -59,14 +61,14 @@
           </div>
           <b-button type="submit" size="sm" class="auth-btn mb-1" variant="inverse" v-if="!loading">Recuperar contraseña</b-button>
           <a href="#" class="d-block text-left" @click="showRegister = false" v-if="!loading">Volver</a>
-          <!-- <router-link class="d-block text-right" to="login" @click="showRegister = false">Recuperar contraseña</router-link> -->
-          <!--<p class="widget-auth-info">or sign in with</p>-->
-          <!--<div class="social-buttons">
+          <!-- <router-link class="d-block text-right" to="login" @click="showRegister = false">Recuperar contraseña</router-link> 
+          <p class="widget-auth-info">O inicia sesión con</p>
+          <div class="social-buttons">
             <b-button variant="primary" class="social-button mb-2">
               <i class="social-icon social-google"></i>
               <p class="social-text">GOOGLE</p>
             </b-button>
-            <b-button variant="success" class="social-button">
+           <b-button variant="success" class="social-button">
               <i class="social-icon social-microsoft"></i>
               <p class="social-text">MICROSOFT</p>
             </b-button>
@@ -76,9 +78,9 @@
           <i class="la la-spinner la-spin" v-if="loading"></i>
         </div>
         <!--<p class="widget-auth-info">
-          Don't have an account? Sign up now!
+          ¿No tienes cuenta? Crea tu cuenta ahora!
         </p>
-        <router-link class="d-block text-center" to="login">Create an Account</router-link>-->
+        <router-link class="d-block text-center" to="login">Crear una Cuenta</router-link>-->
       </Widget>
     </b-container>
     <footer class="auth-footer">
@@ -102,6 +104,7 @@ export default {
       errorMessage: null,
       showRegister: false,
       showPassword: false,
+      usuarios:null,
     };
   },
   methods: {
@@ -118,40 +121,53 @@ export default {
       this.showRegister = true;
     },
     login() {
-      this.loading = true,
-      axios.post(config.hostname+'user/signin', {
-      // c_usuario: this.email,
-      // c_contrasena_usuario: this.password
-      c_usuario: 'drem.piura.sis@gmail.com',
-      c_contrasena_usuario: '1234'
+      this.loading = true;
+      if(this.email == "" || this.password == ""){
+        this.$toasted.error("Falta colocar email o contraseña", {
+            
+            duration: 1500,
+            position: 'top-center'
+        });
+        this.loading = false;
+        return;
+      }
+      axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/usuario.json', {
+      c_usuario: this.email,
+      c_contrasena_usuario: this.password
+      //c_usuario: 'drem.piura.sis@gmail.com',
+      //c_contrasena_usuario: '1234'
       })
       .then( (response) =>{
         this.loading = false;
-        if(response.data.message.substring(0,10) === 'Bienvenido'){
-          this.$toasted.success(response.data.message, {
+        this.usuarios = response.data;
+        console.log('usuario',this.usuarios);
+        this.usuarios.forEach(data => {
+          if(data.correo === this.email && data.contrasena == this.password ){
+            this.$toasted.success('Usuario y contraseña correctos', {
+            duration: 1500,
+            position: 'top-center'
+            });
+            setTimeout( ()=> {
+              window.localStorage.setItem('usuario',this.email);
+              this.$router.push('/app/generarOrden');
+            }, 1000);
+          }else{
+          this.$toasted.error('Usuario y contraseña incorrectos', {
             duration: 1500,
             position: 'top-center'
           });
-          setTimeout( ()=> {
-              this.$router.push('/app/partes');
-              window.localStorage.setItem('authenticated', true);
-              window.localStorage.setItem('user',JSON.stringify(response.data.usuario[0]));
-              window.localStorage.setItem('token',response.data.token);
-          }, 1000);
         }
-        else{
-          this.$toasted.error(response.data.message, {
-            duration: 1500,
-            position: 'top-center'
-          });
-        }
+          
+        });
+        
+        
       })
       .catch( (error) =>{
-        console.log(error);
+        console.log('error',error);
       });
     },
     rememberPassword(){
-      this.loading = true,
+      this.loading = true;
       axios.post(config.hostname+'user/restablecer_contrasena', {
       c_usuario: this.email,
       })
@@ -182,7 +198,7 @@ export default {
   },
   created() {
     if (window.localStorage.getItem('authenticated') === 'true') {
-      this.$router.push('/app/main/analytics');
+      this.$router.push('/app/generarOrden');
     }
   },
 };

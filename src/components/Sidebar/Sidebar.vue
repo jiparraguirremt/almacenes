@@ -28,11 +28,23 @@
             iconName="flaticon-settings"
             index="soporte"
             :childrenLinks="[
-              { header: 'Orden de compra', link: '/app/generarOrden' },
+              //{ header: 'Orden de compra', link: '/app/generarOrden' },
               { header: 'Aprobar orden de compra', link: '/app/aprobarOrden' },
               { header: 'Solicitar presupuesto' },
               { header: 'Confirma compra' },
-              { header: 'Formularirio de Solicitud de Material', link:'/app/formularioSolicitudMaterial'},
+              { header: 'Formulario de Solicitud de Material', link:'/app/formularioSolicitudMaterial'},
+            ]"
+        />
+        <NavLink 
+            :activeItem="activeItem"
+            header="Soporte"
+            link="/app/soporte"
+            iconName="flaticon-settings"
+            index="soporte"
+            :childrenLinks="[
+              { header: 'Usuarios', link: '/app/soporte/usuario' },
+              { header: 'Personal', link: '/app/soporte/personal' },
+              { header: 'Maestros', link: '/app/soporte/maestro' },
             ]"
         />
         <!-- <NavLink
@@ -119,20 +131,9 @@
             iconName="flaticon-flag"
             index="log"
             isHeader
-        />
+        />-->
         
-        <NavLink v-if="user.id_area_trabajo == 8"
-            :activeItem="activeItem"
-            header="Soporte"
-            link="/app/soporte"
-            iconName="flaticon-settings"
-            index="soporte"
-            :childrenLinks="[
-              { header: 'Usuarios', link: '/app/soporte/usuario' },
-              { header: 'Personal', link: '/app/soporte/personal' },
-              { header: 'Maestros', link: '/app/soporte/maestro' },
-            ]"
-        /> -->
+        
 
         <!-- <NavLink
             :activeItem="activeItem"

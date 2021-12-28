@@ -40,9 +40,10 @@
             <h5 class="page-title">Lista de <span class="fw-semi-bold">Ordenes de compra</span></h5>
           </b-col>
           <b-col cols="2" v-show="orden.length != 0">
+      
             <b-row>
               <b-col class="text-right pr-3 mt-2">
-                <p>Cantidad:</p>
+                <b-button variant="inverse" class="mr-xs" size="sm"  @click="RegistroNuevo">Registro nuevo</b-button>
               </b-col>
               <b-col class="text-left pl-0">
                 <b-form-group id="input-group-perpage"  label-for="input-perpage">
@@ -470,6 +471,7 @@ export default {
       ip: config.ip,
       user:{},
       id_user:null,
+      usuario:null,
       page: 1,
       perpage: 10,
       allRows: 0,
@@ -1209,13 +1211,18 @@ export default {
       pdf.text('CÓDIGO',150,10);
       pdf.text('OC18043',150,20);
       pdf.save('boleta.pdf');
+    },
+    RegistroNuevo(){
+    this.$router.push('/app/generarOrden');
     }
   },
+  
   computed: {
   
   },
   created() {
     this.getOrden();
+    this.usuario = window.localStorage.getItem('usuario');
     // this.loadTypeDoc();
     // this.user = JSON.parse(window.localStorage.getItem('user'));
     // this.id_user = this.user.id_usuario;

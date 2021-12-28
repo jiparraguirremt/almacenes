@@ -36,7 +36,8 @@ import NotificationsPage from '@/pages/Notifications/Notifications';
 import PersonalPage from '@/pages/Soporte/Personal/Personal';
 import GenerarOrdenPage from '@/pages/CompraMateriales/GenerarOrden/GenerarOrden';
 import AprobarOrdenPage from '@/pages/CompraMateriales/AprobarOrden/AprobarOrden';
-import FormularioSolicitudMaterial from '@/pages/SolicitudMaterial/FormularioSolicitudMaterial/FormularioSolicitudMaterial';
+import FormularioSolicitudMaterial from '@/pages/FormularioSolicitudMaterial/FormularioSolicitudMaterial';
+import AgregarItems from '@/pages/FormularioSolicitudMaterial/AgregarItems/AgregarItems';
 
 Vue.use(Router);
 
@@ -72,6 +73,13 @@ export default new Router({
           path: 'formularioSolicitudMaterial',
           name: 'FormularioSolicitudMaterial',
           component : FormularioSolicitudMaterial,
+          children:[
+            {
+              path: 'agregarItems',
+              name: 'AgregarItems',
+              component: AgregarItems
+            }
+          ]
         },
         
         

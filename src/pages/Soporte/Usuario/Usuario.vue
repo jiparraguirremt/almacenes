@@ -24,26 +24,25 @@
                   <th class="hidden-sm-down">E-mail</th>
                   <th class="hidden-sm-down">Celular</th>
                   <th class="hidden-sm-down">Estado</th>
-                  <th class="hidden-sm-down text-center">baja/alta</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in users" :key="row.id_usuario">
+                <tr v-for="row in usuarios" :key="row.id_usuario">
                   <td>{{row.id_usuario}}</td>
                   <td>
-                    {{row.c_nombres_cargo}}
+                    {{row.rol}}
                   </td>
                   <td>
-                    {{row.c_nombres_personal}}
+                    {{row.nombre_usuario}}
                   </td>
                   <td class="text-semi-muted">
-                    {{row.c_appat_personal}} {{row.c_apmat_personal}}
+                    {{row.correo}} 
                   </td>
                   <td class="text-semi-muted">
-                    {{row.c_email_personal}}
+                    {{row.celular}}
                   </td>
                   <td class="text-semi-muted">
-                    {{row.c_celular_personal}}
+                    {{row.estado}}
                   </td>
                   <td >
                     <b-badge variant="success" pill v-if="row.b_usuario == true">Activo</b-badge>
@@ -51,19 +50,19 @@
                   </td>
                   <td class="text-center">
                     <b-button v-if="row.b_usuario == true && row.id_usuario!=1"
-                    variant="danger" size="sm" @click="openModalDelete(row.id_usuario)">
+                    variant="danger" size="sm" >
                       <b-icon icon="arrow-down" aria-hidden="true"></b-icon>
                     </b-button>
                     <b-button v-if="row.b_usuario == false && row.id_usuario!=1" 
-                    variant="success" size="sm" @click="openModalRevert(row.id_usuario)">
+                    variant="success" size="sm">
                       <b-icon icon="arrow-up" aria-hidden="true"></b-icon>
                     </b-button>
                     <b-modal :id="'modal-delete-'+row.id_usuario" title="Dar de baja usuario" header-bg-variant="dark" body-bg-variant="light"
                     header-text-variant="white" :hide-footer="true">
                     ¿Desea dar de baja al usuario? <br>
                     <div class="text-right">
-                      <b-button v-if="!loadingModal" variant="secondary"  @click="hideModalDelete(row.id_usuario,row);">No</b-button>
-                      <b-button v-if="!loadingModal" variant="danger" @click="deleteRow(row.id_usuario);">Si</b-button>
+                      <b-button v-if="!loadingModal" variant="secondary"  >No</b-button>
+                      <b-button v-if="!loadingModal" variant="danger" >Si</b-button>
                        <div class="data-loader">
                         <i class="la la-spinner la-spin" v-if="loadingModal"></i>
                       </div>
@@ -73,8 +72,8 @@
                     header-text-variant="white" :hide-footer="true">
                     ¿Desea dar de alta al usuario? <br>
                     <div class="text-right">
-                      <b-button v-if="!loadingModal" variant="secondary"  @click="hideModalRevert(row.id_usuario,row);">No</b-button>
-                      <b-button v-if="!loadingModal" variant="success" @click="revertRow(row.id_usuario);">Si</b-button>
+                      <b-button v-if="!loadingModal" variant="secondary">No</b-button>
+                      <b-button v-if="!loadingModal" variant="success" >Si</b-button>
                        <div class="data-loader">
                         <i class="la la-spinner la-spin" v-if="loadingModal"></i>
                       </div>
@@ -258,6 +257,7 @@ export default {
       loadingForm: false,
       loadingDni: false,
       loadingModal: false,
+      usuarios:[],
       users: [],
       contracts: [],
       positions: [],
@@ -577,16 +577,26 @@ export default {
       .catch( (error) =>{
         console.log(error);
       });
+    },
+    obtenerUsuarios(){
+      this.loadingTable = true;
+      axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/usuario.json')
+      .then((response) =>{
+        this.usuarios = response.data
+        console.log('usuarios',this.usuarios)
+      })
     }
+      
+      
   },
+    
   computed: {
     
   },
   created() {
     let user = JSON.parse(window.localStorage.getItem('user'));
-    if (user.id_area_trabajo !=8) {
-     this.$router.push('/app/partes');
-    }
+    this.obtenerUsuarios();
+    
       this.load();
       this.loadContracts();
       this.loadPositions();

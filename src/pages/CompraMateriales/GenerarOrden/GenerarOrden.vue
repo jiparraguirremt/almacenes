@@ -1,421 +1,221 @@
 <template>
-<div class="partes-page">
+  <div class="orden-page">
     <b-row>
-    <b-col cols="8">
-      <h2 class="page-title">Orden de <span class="fw-semi-bold">compra</span></h2>
-    </b-col>
-    <!-- <b-col cols="4" v-if="showTable">
-       <b-form class="d-sm-down-none ml-5" >
-        <b-form-group>
-          <b-input-group >
-            <template v-slot:prepend>
-              <b-button class="btn-buscar" @click="searchData"> 
-                <b-input-group-text class="bordes"><i class='fi flaticon-search-2'/></b-input-group-text>
-              </b-button>
-            </template>
-             <b-form-select 
-              id="inline-form-custom-select-pref"
-              class="sm"
-              :options="[
-              {text: 'Buscar por :', value: null},
-              { text: 'Asunto', value: 'asunto' }, 
-              {text: 'Codigo',value: 'exp'},
-              {text: 'Todo',value: 'todo'}]"
-              v-model="typeInput"
-              :value="null"
-            ></b-form-select> 
-            <b-form-input id="search-input" placeholder="Buscar" v-model="searchInput" v-if="typeInput!='todo'"  v-on:keyup.enter="searchData"/>
-          </b-input-group>
-        </b-form-group>
-      </b-form>
-    </b-col> -->
-  </b-row>
+      <b-col>
+        <h2 class="page-title">Orden de <span class="fw-semi-bold">compra</span></h2>
+      </b-col>
+    </b-row>
     <b-row>
       <b-col>
         <Widget
           customHeader
         >
-        <b-row v-show="showTable">
-          <b-col cols="10">
-            <h5 class="page-title">Lista de - <span class="fw-semi-bold">Expedientes</span></h5>
-          </b-col>
-          <b-col cols="2" v-show="expedientes.length != 0">
-            <b-row>
-              <b-col class="text-right pr-3 mt-2">
-                <p>Cantidad:</p>
-              </b-col>
-              <b-col class="text-left pl-0">
-                <b-form-group id="input-group-perpage"  label-for="input-perpage">
-                <b-form-select
-                  @change="loadPerPage(perpage)"
-                  id="input-perpage"
-                  v-model="perpage"
-                  :options="optionsPerPage"
-                  ></b-form-select>
-                </b-form-group>
-              </b-col>
-            </b-row>
-          </b-col>
-        </b-row>
-           
         <h5 v-show="!showTable" class="page-title">Generar <span class="fw-semi-bold">orden de compra</span></h5>
-        <div class="data-loader">
-          <i class="la la-spinner la-spin" v-if="loadingTable"></i>
-        </div>
-        <div v-show="showTable">
-          <p class="text-center" v-if="expedientes.length == 0">No hay registros</p>
-          <div class="table-resposive" >
-            <table class="table table-hover" v-if="expedientes.length != 0">
-              <thead>
-                <tr>
-                  <th class="hidden-sm-down">#</th>
-                  <th>Asunto</th>
-                  <th class="hidden-sm-down">N° de Registro</th>
-                  <th class="hidden-sm-down">Fecha</th>
-                  <th class="hidden-sm-down">Documento</th>
-                  <th class="hidden-sm-down">Estado</th>
-                  <th class="hidden-sm-down">Editar</th>
-                  <th class="hidden-sm-down">Eliminar</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in expedientes" :key="row.id_expediente">
-                  <td>{{row.id_expediente}}</td>
-                  <td class="width-150">
-                    {{row.c_asunto_exp}}
-                  </td>
-                  <td>
-                    <p class="mb-0">
-                      <small>
-                        <span class="fw-semi-bold">Codigo:</span>
-                        <span class="text-muted">&nbsp; {{row.c_cod_exp}}</span>
-                      </small>
-                    </p>
-                    <p>
-                      <small>
-                        <span class="fw-semi-bold">Serie:</span>
-                        <span class="text-muted">&nbsp; {{row.id_tipo_doc_exp}}</span>
-                      </small>
-                    </p>
-                  </td>
-                  <td class="text-semi-muted">
-                    {{format_date(row.d_tramite_exp)}}
-                  </td>
-                  <td class="text-semi-muted">
-                    <div style="width: 150px;white-space: normal;overflow: hidden;text-overflow: Ellipsis"
-                     v-for="file in row.arc_exp" :key="file.id_archivos_exp">
-                        <a target="_blank" :href="ip+'/public/'+file.c_archivo_exp">
-                        {{file.c_archivo_exp}}</a>
-                      </div>
-                  </td>
-                  <td class="width-150">
-                    <b-badge variant="warning" pill>Pendiente</b-badge>
-                  </td>
-                  <td>
-                    <b-button variant="gray" size="sm" @click="openModalEdit(row.id_expediente,row)">
-                      <b-icon icon="pencil-square" aria-hidden="true"></b-icon>
-                    </b-button>
-                     <b-modal :id="'modal-edit-'+row.id_expediente" title="Editar Expediente" header-bg-variant="dark" body-bg-variant="light" 
-                     header-text-variant="white" :hide-footer="true">
-                      
-                      <b-form v-if="show">
-                        
-                        <b-form-group id="input-group-codeDoc" label="Codigo del documento:" label-for="input-codeDoc">
-                        <b-form-input
-                          id="input-codeDoc"
-                          v-model="form.codeDoc"
-                          placeholder="Ingrese el codigo del documento"
-                          ></b-form-input>
-                        </b-form-group>
-                        <b-form-group id="input-group-hrc" label="Nota:" label-for="input-hrc">
-                        <b-form-input
-                          id="input-hrc"
-                          v-model="form.hrcDoc"
-                          placeholder="Ingrese el codigo HRC"
-                          ></b-form-input>
-                        </b-form-group>
-                        <b-form-group id="input-group-6" label="Tipo de Documento:" label-for="input-6">
-                          <b-form-select
-                            id="input-6"
-                            v-model="form.tipoDoc"
-                            :options="typeDoc"
-                            ></b-form-select>
-                        </b-form-group>    
-
-                        <b-form-group id="input-group-5" label="Asunto:" label-for="input-5">
-                          <b-form-input
-                            id="input-5"
-                            v-model="form.issueDoc"
-                            placeholder="Ingrese el asunto del documento"
-                          ></b-form-input>
-                        </b-form-group>
-                        <b-form-group id="input-group-3" label="Fecha del documento:" label-for="input-3">
-                          <div>
-                            <date-picker v-model="form.timeDoc" valueType="format" placeholder="Seleccione una fecha">
-                            </date-picker>
-                          </div>
-                        </b-form-group>
-
-                      </b-form>
-                      <div class="text-right">
-                        <b-button v-if="!loadingModal" variant="secondary" @click="hideModalEdit(row.id_expediente);">Cancelar</b-button>
-                        <b-button class="ml-1" v-if="!loadingModal" variant="info" @click="editRow(row.id_expediente);">Editar</b-button>
-                        <div class="data-loader">
-                          <i class="la la-spinner la-spin" v-if="loadingModal"></i>
-                        </div>
-                      </div>
-                      
-                    </b-modal>  
-                  </td>
-                  <td  style="text-muted">
-
-                    <!-- <b-form-checkbox :checked="row.id_expediente" @change="openModalDelete(row.id_expediente)" name="check-button" switch>
-                    </b-form-checkbox> -->
-
-                    <b-button variant="danger" size="sm" @click="openModalDelete(row.id_expediente)">
-                      <b-icon icon="trash" aria-hidden="true"></b-icon>
-                    </b-button>
-                    <b-modal :id="'modal-delete-'+row.id_expediente" title="Eliminar Expediente" header-bg-variant="dark" body-bg-variant="light"
-                    header-text-variant="white" :hide-footer="true">
-                    ¿Desea enviar el expediente al historial? <br>
-                    <div class="text-right">
-                      <b-button v-if="!loadingModal" variant="secondary"  @click="hideModalDelete(row.id_expediente);">No</b-button>
-                      <b-button v-if="!loadingModal" class="ml-1" variant="danger" @click="deleteRow(row.id_expediente);">Si</b-button>
-                       <div class="data-loader">
-                        <i class="la la-spinner la-spin" v-if="loadingModal"></i>
-                      </div>
-                    </div>
-                  </b-modal>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="clearfix">
-            <div class="float-right">
-              <!--<b-button variant="default" class="mr-3" size="sm" >Send to...</b-button>-->
-              <b-button variant="inverse" class="mr-xs" size="sm" @click="register">Agregar</b-button>
-            </div>
-          </div>
-          <div v-show="expedientes.length != 0" class="mt-3">
-            <!-- <h6 class="text-right">Pagi</h6> -->
-            <b-pagination v-show="showTable" v-model="page" :total-rows="allRows" 
-            :per-page="perpage" align="right" @input =" loadPage(page)" first-number
-            last-number>
-            </b-pagination>
-          </div>
-        </div>
-        <div v-show="showRegister" >
-            <!-- <b-form @submit.prevent="onSubmit" @reset="onReset" v-if="show"> -->
-             <b-form @submit.prevent="postOrden" @reset="onReset" v-if="show">
-               <!-- <b-row>
-                 <b-col cols="8">
-                  <b-form-group id="input-group-dni" label="DNI O RUC:" label-for="input-dni">
-                  <b-form-input
-                  id="input-dni"
-                  v-model="form.dniDoc"
-                  placeholder="Ingrese el DNI O RUC"
-                  ></b-form-input>
+        <div>
+          <b-form @submit.prevent="postOrden" @reset="onReset" v-if="show">
+            <b-row>
+                <b-col cols="12" md="2">
+                  <b-form-group id="input-group-codigo" label="Código:" label-for="input-codigo">
+                  <b-form-input id="input-codigo" v-model="formOrden.codigo" placeholder="Código de OC"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                 <b-col cols="12" md="8">
+                   <b-form-group id="input-group-usuario" label="Usuario:" label-for="input-usuario">
+                  <b-form-input id="input-usuario" v-model="formOrden.usuario" ></b-form-input>
                   </b-form-group>
                  </b-col>
-                 <b-col cols="2" style="padding:0px;">
-                   <div class="data-loader"  v-if="loadingDni">
-                      <i class="la la-spinner la-spin"></i>
-                    </div>
-                    <b-button v-if="!loadingDni" variant="inverse" class="mr-xs" style="margin-top:28px" size="xl" @click="getAdministrado">
-                    Obtener</b-button>
-                 </b-col>
-                 <b-col cols="2"  style="padding-left:0px;">
-                  <b-form-group id="input-group-admincode" label="Codigo administrado" label-for="input-admincode">
-                  <b-form-input
-                  id="input-admincode"
-                  v-model="form.adminCode"
-                  placeholder="" disabled
-                  ></b-form-input>
-                </b-form-group>
-                 </b-col>
-               </b-row> -->
-                
-               <b-row>
-                 <b-col cols="8" md="8">
-                  <b-form-group id="input-group-dni" label="SKU Producto:" label-for="input-dni">
-                  <b-form-input
-                  id="input-dni"
-                  v-model="formOrden.producto"
-                  placeholder="Ingrese SKU del producto"
-                  ></b-form-input>
-                  </b-form-group>
-                 </b-col>
-                 <b-col cols="2" md="1" style="padding:0px;">
-                   <div class="data-loader"  v-if="loadingDni">
-                      <i class="la la-spinner la-spin"></i>
-                    </div>
-                    <b-button v-if="!loadingDni" variant="inverse" class="mr-xs" style="margin-top:28px" size="xl" @click="getAdministrado">
-                    Buscar</b-button>
-                 </b-col>
-                 <b-col cols="12" md="3">
-                  <b-form-group id="input-group-admincode" label="Nombre Producto" label-for="input-admincode">
-                  <b-form-input
-                  id="input-admincode"
-                  v-model="form.adminCode"
-                  placeholder="" disabled
-                  ></b-form-input>
-                </b-form-group>
-                 </b-col>
-               </b-row>
-
-              <b-form-group id="input-group-6" label="Proveedor:" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.proveedor"
-                    :options="proveedorList"
-                    
-                    ></b-form-select>
-                </b-form-group>    
-
-                <b-form-group id="input-group-6" label="Facturar a:" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.facturar"
-                    :options="facturarList"
-                    
-                    ></b-form-select>
-                </b-form-group>    
-
-               <b-form-group id="input-group-2" label="Descripcion :" label-for="input-2">
-                  <b-form-textarea
-                    id="input-2"
-                    v-model="formOrden.descripcion"
-                    placeholder=""
-                    rows="4"
-                    max-rows="5"
-                  ></b-form-textarea>
-                </b-form-group>
-
-                <b-form-group id="input-group-2" label="Proyecto :" label-for="input-2">
-                  <b-form-input
-                    id="input-2"
-                    v-model="formOrden.proyecto"
-                    placeholder=""
-                  ></b-form-input>
-                </b-form-group>
-
-                <!-- <b-form-group id="input-group-2" label="Codigo del documento:" label-for="input-2">
-                  <b-form-input
-                    id="input-2"
-                    v-model="form.codeDoc"
-                    placeholder="Ingrese el codigo del documento"
-                  ></b-form-input>
-                </b-form-group> -->
-
-                <b-form-group id="input-group-2" label="Nota:" label-for="input-2">
-                  <b-form-input
-                    id="input-2"
-                    v-model="formOrden.nota"
-                    placeholder=""
-                  ></b-form-input>
-                </b-form-group>
-
-                <b-form-group id="input-group-6" label="Área solicitante:" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.origen"
-                    :options="origenList"
-                    
-                    ></b-form-select>
-                </b-form-group>    
-
-                <b-row>
-                  <b-col cols="12" md="3">
-                     <b-form-group id="input-group-3" label="Fecha:" label-for="input-3">
-                    <div>
+                 <b-col cols="12" md="2">
+                  <b-form-group id="input-group-fecha" label="Fecha" label-for="input-admincode">
+                  <div>
                     <date-picker v-model="formOrden.fecha" valueType="format" placeholder="Seleccione una fecha">
                     </date-picker>
                   </div>
                   </b-form-group>
-                  </b-col>
-                  <b-col cols="12" md="3">
-                    <b-form-group id="input-group-6" label="Forma de pago:" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.pago"
-                    :options="pagoList"
-                    ></b-form-select>
-                </b-form-group>    
-                  </b-col>
-                  <b-col cols="12" md="3">
-                    <b-form-group id="input-group-6" label="Moneda :" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.moneda"
-                    :options="monedaList"
-                    ></b-form-select>
-                </b-form-group>    
-                  </b-col>
-
-                  <b-col cols="12" md="3">
-                    <b-form-group id="input-group-6" label="Condiciones de entrega :" label-for="input-6">
-                   <b-form-select
-                    id="input-6"
-                    v-model="formOrden.entrega"
-                    :options="entregaList"
-                    ></b-form-select>
-                </b-form-group>    
-                  </b-col>
-                </b-row>
-               
-
-                <!-- <b-form-group id="input-group-nro" label="Número de Documento:" label-for="input-nro">
-                   <b-form-input
-                    id="input-nro"
-                    v-model="form.nroDoc"
-                    placeholder="Ingrese el nro de documento"
-                    
-                    ></b-form-input>
-                </b-form-group>    
-              
-                <b-form-group id="input-group-5" label="Asunto:" label-for="input-5">
-                  <b-form-input
-                    id="input-5"
-                    v-model="form.issueDoc"
-                    placeholder="Ingrese el asunto del documento"
-                    
-                  ></b-form-input>
-                </b-form-group> -->
-                <!-- <b-form-group id="input-group-3" label="Fecha del orden:" label-for="input-3">
-                  <div>
-                    <date-picker v-model="form.timeDoc" valueType="format" placeholder="Seleccione una fecha">
-                    </date-picker>
+                </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-proveedor" label="Proveedor:" label-for="input-proveedor">
+                  <ejs-autocomplete :dataSource="proveedoresArr" :fields="dataFields" placeholder="Seleccione Proveedor" :highlight="true" v-model="formOrden.proveedor">
+                  </ejs-autocomplete>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-areaSolicitante" label="Área Solicitante:" label-for="input-areaSolicitante">
+                  <b-form-select id="input-areaSolicitante" v-model="formOrden.areaSolicitante" :options="solicitantelist"></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-facturar" label="Factura A:" label-for="input-facturar">
+                  <b-form-select id="input-facturar" v-model="formOrden.facturar" :options="facturarList" @change="matches"></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-NIT" label="NIT:" label-for="input-NIT">
+                  <b-form-input id="input-NIT" v-model="formOrden.NIT" placeholder="" disabled ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-pago" label="Tipo de Pago:" label-for="input-pago">
+                  <b-form-select id="input-pago" v-model="formOrden.pago" :options="pagoList" ></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                  <b-form-group id="input-group-descripcion" label="Descripción:" label-for="input-descripcion">
+                  <b-form-input id="input-descripcion" v-model="formOrden.descripcion" ></b-form-input>
+                  </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-moneda" label="Moneda:" label-for="input-moneda">
+                  <b-form-select id="input-moneda" v-model="formOrden.moneda" :options="monedaList" ></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" md="3">
+                <b-form-group id="input-group-entrega" label="Tiempo de entrega:" label-for="input-entrega">
+                  <b-form-select id="input-entrega" v-model="formOrden.entrega" :options="entregaList" ></b-form-select>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <hr>
+            <b-row>
+              <b-col cols="12" md="10">
+              </b-col>
+              <b-col cols="12" md="2" class="btn btn-i-success pull-left">
+                <b-button variant="gray" size="sm"  @click="openModalAdd()">
+                      <b-icon  icon="plus-square" aria-hidden="true"></b-icon>
+                </b-button>
+              </b-col>
+            </b-row>
+            <div>
+            <div>
+              <b-modal :id="'modal-add-item'" title="Agregar Item" header-bg-variant="dark" body-bg-variant="light" header-text-variant="white" :hide-footer="true" >
+                <b-form>
+                  
+                  <b-form-group id="input-group-SKU" label="SKU:" label-for="input-SKU">
+                      <b-form-input id="input-SKU" v-model="formProducto.SKU" placeholder="Ingrese el SKU del producto" @change="descripProducto"></b-form-input>
+                  </b-form-group> 
+                  <b-form-group id="input-group-codFabrica" label="Código de Fábrica:" label-for="input-codFabrica">
+                        <b-form-input id="input-codFabrica" v-model="formProducto.codFabrica" disabled></b-form-input>
+                  </b-form-group>
+                  <b-form-group id="input-group-marca" label="Marca:" label-for="input-marca">
+                        <b-form-input id="input-marca" v-model="formProducto.marca" disabled></b-form-input>
+                  </b-form-group>
+                  <b-form-group id="input-group-descripcion" label="Descripción:" label-for="input-descripcion">
+                        <b-form-input id="input-descripcion" v-model="formProducto.descripcion" disabled></b-form-input>
+                  </b-form-group>
+                  <b-row>
+                    <b-col cols="12" md="6">
+                      <b-form-group id="input-group-unidad" label="Unidad:" label-for="input-unidad">
+                        <b-form-input id="input-unidad" v-model="formProducto.unidad" placeholder="Ingrese unidad" class="text-right"></b-form-input>
+                      </b-form-group>
+                    </b-col>
+                    <b-col cols="12" md="6">
+                      <b-form-group id="input-group-cantidad" label="Cantidad:" label-for="input-cantidad">
+                        <b-form-input id="input-cantidad" v-model="formProducto.cantidad" placeholder="Ingrese Cantidad" class="text-right" @change="setearPreciot"></b-form-input>
+                      </b-form-group>
+                    </b-col>
+                  </b-row>
+                  <b-row>
+                    <b-col cols="12" md="6">
+                      <b-form-group id="input-group-precioU" label="Precio Unitario:" label-for="input-precioU">
+                        <b-form-input id="input-precioU" v-model="formProducto.precioU" disabled class="text-right"></b-form-input>
+                      </b-form-group>
+                    </b-col>
+                    <b-col cols="12" md="6">
+                      <b-form-group id="input-group-precioT" label="Precio Total:" label-for="input-precioT">
+                        <b-form-input id="input-precioT" v-model="formProducto.precioT" disabled class="text-right"></b-form-input>
+                      </b-form-group>
+                    </b-col>
+                  </b-row>
+                  <div class="data-loader"  v-if="loadingModal">
+                      <em class="la la-spinner la-spin"></em>
                   </div>
-                </b-form-group> -->
-                <!-- <b-form-group id="input-group-4" label="Carga de documento:" label-for="input-4">
-                  <div class="text-right">
-                    <b-button @click="removeAllFiles" variant="danger">Quitar todo</b-button>
-                    <input type="file" @change="onFileSelected"> 
-                    <vue-dropzone ref="dropzoneCreate" id="dropzoneCreate" :options="dropzoneOptions" @vdropzone-complete="afterComplete"></vue-dropzone>
-                  </div>
-                </b-form-group> -->
-                <div class="mt-3"></div>
-                <b-button type="submit" variant="inverse" v-if="!loadingForm">Enviar</b-button>
-                <b-button type="reset" variant="default" v-if="!loadingForm">cancelar</b-button>
-                <div class="data-loader">
-                  <i class="la la-spinner la-spin" v-if="loadingForm"></i>
-                </div>
-              </b-form>
-        </div>
+                  <b-button  variant="inverse" class="mr-xs" style="margin-top:28px;margin-left:380px" size="xl" @click="AgregarItem" >Agregar</b-button>
+                </b-form>
+              </b-modal>
+            </div>
+            <div class="table-resposive">
+              <table  class="table table-hover">
+                <thead>
+                <tr>
+                  <th id="item" class="hidden-sm-down">Item</th>
+                  <th id="sku" class="hidden-sm-down">SKU</th>
+                  <th id="cod" class="hidden-sm-down">Cod F.</th>
+                  <th id="marca" class="hidden-sm-down">Marca</th>
+                  <th id="decripcion" >Descripción</th>
+                  <th id="unidad" class="hidden-sm-down">Unidad</th> 
+                  <th id="cantidad" class="hidden-sm-down">Cantidad</th> 
+                  <th id="precioU" class="hidden-sm-down">Precio Unitario</th> 
+                  <th id="precioT" class="hidden-sm-down">Precio T. Bs</th> 
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in productoGeneral" :key="row.productoGeneral">
+                  <td class="text-center"><span ><b-icon  icon="file-minus" aria-hidden="true" style="cursor: pointer;" @click="quitarItem(i)" ></b-icon></span></td>
+                  <td>{{row.SKU}}</td>
+                  <td>{{row.codFabrica}}</td>
+                  <td>{{row.marca}}</td>
+                  <td>{{row.descripcion}}</td>
+                  <td>{{row.unidad}}</td>
+                  <td>{{row.cantidad}}</td>
+                  <td>{{row.precioU}}</td>
+                  <td>{{row.precioT}}</td>
+                </tr>
+              </tbody>
+              </table>
+            </div>
+            <b-row>
+              <b-col cols="12" md="10">
+              </b-col>
+              <b-col cols="12" md="2">
+                <b-form-group id="input-group-subtotal" label="Sub Total:" label-for="input-subtotal">
+                  <b-form-input id="input-subtotal" v-model="formOrden.subtotal" class="text-right" disabled></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" md="10">
+              </b-col>
+              <b-col cols="12" md="2">
+                <b-form-group id="input-group-descuento" label="Descuento:" label-for="input-descuento">
+                  <b-form-input id="input-descuento" v-model="formOrden.descuento" class="text-right" @keyup="setearTotal"></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" md="10">
+              </b-col>
+              <b-col cols="12" md="2">
+                <b-form-group id="input-group-totales" label="Totales:" label-for="input-totales">
+                  <b-form-input id="input-totales" v-model="formOrden.totales" class="text-right" disabled></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </div>
+          <br>
+          <div class="clearfix">
+            <div class="float-right">
+              <b-button variant="default" class="mr-3" size="sm" >Enviar</b-button>
+              <b-button variant="inverse" class="mr-xs" size="sm" @click="postOrden">Guardar</b-button>
+            </div>
+          </div>
+          </b-form>
           
+        </div>
         </Widget>
       </b-col>
     </b-row>
-</div>
-  
+  </div>
 </template>
 <script>
 import Vue from 'vue'
 import config from '../../../config'
 import Widget from '@/components/Widget/Widget'
 import Sparklines from '../../../components/Sparklines/Sparklines'
-
+import { AutoCompletePlugin } from "@syncfusion/ej2-vue-dropdowns";
+Vue.use(AutoCompletePlugin);
 import DatePicker from 'vue2-datepicker'
 import 'vue2-datepicker/index.css'
 import vue2Dropzone from 'vue2-dropzone'
@@ -442,9 +242,12 @@ export default {
       ip: config.ip,
       user:{},
       id_user:null,
+      usuario:null,
       page: 1,
       perpage: 10,
       allRows: 0,
+      nit:[],
+      nitresult:null,
       selectedFile: null,
       loadingDni: false,
       loadingTable: true,
@@ -455,13 +258,18 @@ export default {
       loadingModal: false,
       expedientes: [],
       ordenes: [],
+      dataFields:{value:'text'},
+      productoDetalle:[],
       typeDoc:[{text:'La Paz Murillo',value:1},{text:'Almacen 2',value:2}],
-      proveedorList:[{text:'La Paz Murillo',value:1},{text:'Almacen 2',value:2}],
-      facturarList:[{text:'DigitalWork SA',value:1}],
+      proveedoresArr:[],
+      guiaFiltered:[],
+      solicitantelist:[],
+      facturarList:[],
       origenList:[{text:'SANTA CRUZ',value:1}],
-      pagoList:[{text:'Efectivo',value:1},{text:'Credito',value:2}],
-      monedaList:[{text:'Bolivianos',value:1},{text:'Dolares',value:2}],
-      entregaList:[{text:'Presencial',value:1},{text:'Virtual',value:2}],
+      pagoList:[],
+      monedaList:[],
+      entregaList:[],
+      productoGeneral:[],
       typeInput: null,
       searchInput: '',
       dropzoneOptions: {
@@ -473,9 +281,13 @@ export default {
         headers: { "My-Awesome-Header": "header value" }
       },
       formOrden: {
-        producto:null,
+        codigo:null,
+        usuario:null,
+        producto:[],
         proveedor: null,
+        areaSolicitante:null,
         facturar: null,
+        NIT:null,
         descripcion: null,
         proyecto: null,
         nota: null,
@@ -484,19 +296,19 @@ export default {
         pago: null,
         moneda: null,
         entrega: null,
+        subtotal:0.00,
+        descuento:0.00,
+        totales:0.00
       },
-      form: {
-        nameDoc: null,
-        nameAdmin: '',
-        dniDoc: null,
-        adminCode: '',
-        codeDoc: null,
-        hrcDoc: null,
-        timeDoc: null,
-        tipoDoc: null,
-        nroDoc: null,
-        issueDoc: null,
-        files: []
+      formProducto: {
+        SKU: null,
+        codFabrica:null,
+        marca: null,
+        descripcion:null,
+        unidad: null,
+        cantidad: 0,
+        precioU: 0.00,
+        precioT: 0.00,
       },
       formSearch: {
         searchInput: null,
@@ -733,13 +545,9 @@ export default {
     hideModalDelete(id) {
       this.$root.$emit('bv::hide::modal', 'modal-delete-'+id);
     },
-    openModalEdit(id,row) {
-      this.$root.$emit('bv::show::modal', 'modal-edit-'+id)
-      this.form.issueDoc = row.c_asunto_exp; 
-      this.form.codeDoc = row.c_cod_exp;
-      this.form.hrcDoc = row.c_cod_hrc;
-      this.form.timeDoc = row.d_tramite_exp;
-      this.form.tipoDoc = row.id_tipo_doc_exp;
+    openModalAdd() {
+      this.$root.$emit('bv::show::modal', 'modal-add-item');
+
     },
     hideModalEdit(id) {
       this.$root.$emit('bv::hide::modal', 'modal-edit-'+id);
@@ -1079,6 +887,56 @@ export default {
       //   this.showRegister = false
       // })
     },
+    setearTotal(){
+      this.formOrden.totales = this.formOrden.subtotal - this.formOrden.descuento 
+    },
+    quitarItem(i){
+      this.productoGeneral.splice(i,1)
+    },
+    AgregarItem(){
+      this.loadingModal = true;
+      if(this.formProducto.SKU == null || this.formProducto.SKU == "" ||
+         this.formProducto.codFabrica == null || this.formProducto.codFabrica == "" ||
+         this.formProducto.marca == null || this.formProducto.marca == "" ||
+         this.formProducto.descripcion == null || this.formProducto.descripcion == "" ||
+         this.formProducto.unidad == null || this.formProducto.unidad == "" ||
+         this.formProducto.cantidad == null || this.formProducto.cantidad == "" ||
+         this.formProducto.precioU == null || this.formProducto.precioU == "" ||
+         this.formProducto.precioT == null || this.formProducto.precioT == "" 
+         ){
+          this.loadingModal = false;
+          this.$toasted.error('Rellene todos los campos requeridos', {
+          duration: 1000,
+          position: 'top-center'
+          });
+
+      }else{
+      this.productoGeneral.push(this.formProducto);
+      this.formOrden.subtotal = this.formProducto.precioT;
+      console.log('producto',this.productoGeneral);
+      if(this.productoGeneral.length >= 1){
+        this.loadingModal = false;
+        this.$root.$emit('bv::hide::modal', 'modal-add-item')
+        this.$toasted.success('Item Agregado Correctamente', {
+           duration: 1500,
+           position: 'top-center'
+        });
+      }else{
+        this.loadingModal = false;
+        this.$toasted.error('No se pudo agregar el item, intente de nuevo', {
+           duration: 1500,
+           position: 'top-center'
+        });
+      }
+      }
+      
+      
+
+    },
+    obtenerNit(){
+      this.nit = this.facturarList.filter(item => item.nombre == this.formOrden.facturar);
+      this.formOrden.NIT= this.nit;
+    },
     getAdministrado(){
       this.loadingDni = true;
       setTimeout(()=>{   
@@ -1167,11 +1025,80 @@ export default {
         console.log(error);
       });
     },
+    guiaGet(){
+      axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/guia.json')
+      .then((response) =>{
+        this.guiaFiltered = response.data;
+        console.log('solicitante',this.guiaFiltered);
+        this.solicitantelist = this.guiaFiltered.filter(item => item.grupo_guia == "Area Solicitante");
+        this.solicitantelist.forEach(function(element,index){
+          element.text =  element.nombre
+          element.value = element.nombre
+        })
+        this.facturarList = this.guiaFiltered.filter(item => item.grupo_guia == "Grupo Vuela");
+        this.facturarList.forEach(function(element,index){
+          element.text =  element.nombre
+          element.value = element.nombre
+        })
+        this.pagoList  = this.guiaFiltered.filter(item => item.grupo_guia == "Tipo Pago")
+        this.pagoList.forEach(function(element,index){
+          element.text =  element.nombre
+          element.value = element.nombre
+        })
+        this.monedaList  = this.guiaFiltered.filter(item => item.grupo_guia == "moneda")
+        this.monedaList.forEach(function(element,index){
+          element.text =  element.nombre
+          element.value = element.nombre
+        })
+        this.entregaList  = this.guiaFiltered.filter(item => item.grupo_guia == "Tiempo de Entrega")
+        this.entregaList.forEach(function(element,index){
+          element.text =  element.nombre
+          element.value = element.nombre
+        })
+        console.log('solicitante',this.solicitantelist);
+        console.log('solicitante',this.facturarList);
+      })
+    },
+    proveedorGet(){
+      axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/proveedor.json')
+      .then((response) =>{
+        this.proveedoresArr = response.data;
+        this.proveedoresArr.forEach(function(element){
+          element.text =  element.razon_social
+          element.value = element.razon_social
+        })
+        
+      } )
+    },
+    matches() {
+        this.nit = this.facturarList.filter(item => item.nombre == this.formOrden.facturar);
+        this.formOrden.NIT = this.nit[0].codigo_1
+        console.log('facturar',this.formOrden.NIT);   
+    },
+    descripProducto() {
+        if(this.formProducto.SKU == "1231-Wirel-Fuen-PO-unidad"){
+          this.formProducto.codFabrica = "PA1024-3HU";
+          this.formProducto.marca = "POWER TRON";
+          this.formProducto.descripcion = "ADAPTADOR DE 24V - 1AMP";
+          this.formProducto.precioU = 24.5;
+          
+          console.log('facturar',this.formProducto.SKU); 
+        }else if(this.formProducto.SKU == "1232-Wirel-SAF-SA-unidad"){
+          this.formProducto.codFabrica = "I0AB4811";
+          this.formProducto.marca = "SAF";
+          this.formProducto.descripcion = "Fuente de alimentacion cfip ac -ps  SAF";
+          this.formProducto.precioU = 24.5;
+        }
+          
+    },
+    setearPreciot(){
+      this.formProducto.precioT =  this.formProducto.precioU * this.formProducto.cantidad;
+    },
     postOrden(){
-      console.log(this.formOrden);
+      console.log('orden',this.formOrden);
+      this.formOrden.producto = this.productoGeneral;
       if(this.formOrden.producto == null || this.formOrden.proveedor == null || this.formOrden.facturar == null ||
-          this.formOrden.descripcion == null || this.formOrden.proyecto == null || this.formOrden.nota == null ||
-          this.formOrden.origen == null || this.formOrden.fecha == null || this.formOrden.pago == null ||
+          this.formOrden.descripcion == null  || this.formOrden.fecha == null || this.formOrden.pago == null ||
           this.formOrden.moneda == null || this.formOrden.entrega == null){
             this.$toasted.error('Rellene todos los campos requeridos', {
             duration: 1000,
@@ -1180,7 +1107,9 @@ export default {
           }else{
               axios.get('https://almacenes-q4-default-rtdb.firebaseio.com/orden de compra.json')
               .then( (response) =>{
-                this.formOrden['id_orden']= response.data.length;
+                console.log('response',response);
+                this.formOrden['id_orden']= response.data.length
+                
                 axios.put('https://almacenes-q4-default-rtdb.firebaseio.com/orden de compra/'+response.data.length+'.json',this.formOrden,
                 {
                   headers: {
@@ -1188,7 +1117,8 @@ export default {
                   }
                 })
                 .then( (response) =>{
-                   this.$toasted.success('Se registró la orden de compra', {
+                  this.$router.push('/app/aprobarOrden');
+                  this.$toasted.success('Se registró la orden de compra', {
                   duration: 1000,
                   position: 'top-center'
                 });
@@ -1201,29 +1131,35 @@ export default {
     }
   },
   computed: {
-  
+    
+    
   },
   created() {
+    this.usuario = window.localStorage.getItem('usuario');
+    this.formOrden.usuario = this.usuario;
+    this.proveedorGet();
+    this.guiaGet();
     // this.loadTypeDoc();
-    this.user = JSON.parse(window.localStorage.getItem('user'));
-    this.id_user = this.user.id_usuario;
-    if (window.localStorage.getItem('authenticated') === 'true') {
-     axios.get(config.hostname+'expediente/obtener_expediente_area/1/'+this.page+'/'+this.perpage+'/'+this.id_user)
-      .then( (response) =>{
-        this.expedientes = response.data.data;
-        this.allRows = Number(response.data.total);
-        this.loadingTable = false;
-        this.showTable = false;
-      })
-      .catch( (error) =>{
-        console.log(error);
-      });
-    }
-    else{
-      this.$router.push('/login');
-    }
+    //this.user = JSON.parse(window.localStorage.getItem('user'));
+    //this.id_user = this.user.id_usuario;
+    //if (window.localStorage.getItem('authenticated') === 'true') {
+     //axios.get(config.hostname+'expediente/obtener_expediente_area/1/'+this.page+'/'+this.perpage+'/'+this.id_user)
+     // .then( (response) =>{
+      //  this.expedientes = response.data.data;
+       // this.allRows = Number(response.data.total);
+       // this.loadingTable = false;
+       // this.showTable = false;
+     // })
+     // .catch( (error) =>{
+     //   console.log(error);
+     // });
+   // }
+    //else{
+     // this.$router.push('/login');
+    //}
   }
 };
 </script>
 
-<style src="./GenerarOrden.scss" lang="scss" scoped />
+<style src="./GenerarOrden.scss" lang="scss" scoped >
+</style>

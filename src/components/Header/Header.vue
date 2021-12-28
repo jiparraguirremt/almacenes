@@ -48,7 +48,7 @@
           <span class="avatar rounded-circle thumb-sm float-left mr-2">
             <img class="rounded-circle" src="../../assets/people/user.png" alt="..." />
           </span>
-          <span class="px-2">Ricardo</span>
+          <span class="px-2">{{usuario}}</span>
           <!-- <span class="px-2">{{c_nombres_personal}}</span> -->
           <!--<span class="ml-1 mr-2 circle text-white fw-bold avatar-badge">9</span>
           <i class='fi flaticon-arrow-down px-2' />-->
@@ -89,6 +89,7 @@ export default {
   components: { Notifications },
   data() {
     return {
+      usuario:null,
       user: {
         c_nombres_personal:''
       }
@@ -135,7 +136,8 @@ export default {
     }
   },
   created() {
-    let data = JSON.parse(window.localStorage.getItem('user'));
+    //let data = JSON.parse(window.localStorage.getItem('usuario'));
+    this.usuario = window.localStorage.getItem('usuario');
     this.c_nombres_personal = data.c_nombres_personal;
   }
 };
